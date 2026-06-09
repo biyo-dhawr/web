@@ -1,0 +1,1 @@
+self.__REACT_LOADABLE_MANIFEST="{\"pages\\\\dashboard\\\\index.tsx -> @/components/DashboardMap\":{\"id\":\"pages\\\\dashboard\\\\index.tsx -> @/components/DashboardMap\",\"files\":[\"static/chunks/src_components_DashboardMap_tsx.js\"]}}"
