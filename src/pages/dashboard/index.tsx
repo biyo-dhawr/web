@@ -49,7 +49,7 @@ export default function Dashboard() {
         setLoading(true);
         // Build query string based on filters
         const params = new URLSearchParams();
-        params.append("limit", "500");
+        params.append("limit", "50");
         if (region) params.append("region", region);
         if (district) params.append("district", district);
         if (village) params.append("village", village);

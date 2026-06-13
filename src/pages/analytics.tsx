@@ -1,19 +1,25 @@
 import { useEffect, useState } from "react";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import { Download, Calendar, MoreVertical, Filter } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area, Legend } from "recharts";
 import AuthGuard from "@/components/AuthGuard";
 import api from "@/lib/api";
 import type { AnalyticsData } from "@/lib/types";
+import { exportToCSV } from "@/lib/export";
 
 export default function Analytics() {
+  const router = useRouter();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [days, setDays] = useState(30);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     async function loadData() {
+      setLoading(true);
       try {
-        const res = await api.get<AnalyticsData>("/analytics");
+        const res = await api.get<AnalyticsData>(`/analytics?days=${days}`);
         setData(res);
       } catch (err) {
         console.error("Failed to load analytics", err);
@@ -22,7 +28,32 @@ export default function Analytics() {
       }
     }
     loadData();
-  }, []);
+  }, [days]);
+
+  const handleExport = async () => {
+    if (!data || !data.villageData) return;
+    setIsExporting(true);
+    
+    try {
+      // Simulate a small delay for better UX feedback, since local processing is instant
+      await new Promise(resolve => setTimeout(resolve, 600));
+      
+      const exportData = data.villageData.map((v, index) => ({
+        'Rank (by broken volume)': index + 1,
+        'Village Name': v.village,
+        'Total Water Sources': v.count,
+        'Working Sources': v.working,
+        'Broken Sources': v.broken,
+        'Functional %': Math.round((v.working / v.count) * 100) || 0
+      }));
+      
+      exportToCSV(`analytics_report_${days}_days.csv`, exportData);
+    } catch (err) {
+      console.error("Failed to export", err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   return (
     <AuthGuard requireStaff>
@@ -39,13 +70,26 @@ export default function Analytics() {
           </div>
           
           <div className="flex items-center gap-3 w-full sm:w-auto">
-            <button className="flex-1 sm:flex-none bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
-              <Calendar className="w-4 h-4 text-slate-500" />
-              Last 30 Days
-            </button>
-            <button className="flex-1 sm:flex-none bg-[#0f172a] hover:bg-slate-800 text-white font-medium text-sm px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
-              <Download className="w-4 h-4" />
-              Export Report
+            <div className="relative flex-1 sm:flex-none">
+              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+              <select 
+                value={days}
+                onChange={(e) => setDays(Number(e.target.value))}
+                className="w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-medium pl-9 pr-8 py-2 rounded-lg transition-colors shadow-sm outline-none cursor-pointer appearance-none"
+              >
+                <option value={7}>Last 7 Days</option>
+                <option value={30}>Last 30 Days</option>
+                <option value={90}>Last 90 Days</option>
+                <option value={180}>Last 6 Months</option>
+              </select>
+            </div>
+            <button 
+              onClick={handleExport}
+              disabled={isExporting || !data}
+              className="flex-1 sm:flex-none bg-[#0f172a] hover:bg-slate-800 text-white font-medium text-sm px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {isExporting ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Download className="w-4 h-4" />}
+              {isExporting ? 'Exporting...' : 'Export Report'}
             </button>
           </div>
         </div>
@@ -136,7 +180,18 @@ export default function Analytics() {
                         cursor={{fill: '#f8fafc'}}
                         contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', color: '#0f172a', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                       />
-                      <Bar dataKey="nonFunctional" fill="#c1121f" name="Broken" barSize={40} />
+                      <Bar 
+                        dataKey="broken" 
+                        fill="#c1121f" 
+                        name="Broken" 
+                        barSize={40} 
+                        onClick={(entry) => {
+                          if (entry && entry.village) {
+                            router.push(`/admin/water-sources?search=${encodeURIComponent(entry.village)}&status=Broken`);
+                          }
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 )}
@@ -167,8 +222,8 @@ export default function Analytics() {
                         cursor={{fill: '#f8fafc'}}
                         contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', color: '#0f172a', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                       />
-                      <Bar dataKey="functional" fill="#006d77" name="Working" barSize={30} />
-                      <Bar dataKey="count" fill="#c1121f" name="Broken" barSize={30} />
+                      <Bar dataKey="working" fill="#006d77" name="Working" barSize={30} />
+                      <Bar dataKey="broken" fill="#c1121f" name="Broken" barSize={30} />
                     </BarChart>
                   </ResponsiveContainer>
                 )}

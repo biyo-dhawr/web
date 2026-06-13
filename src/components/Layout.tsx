@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import type { AuthUser } from "@/lib/types";
+import api from "@/lib/api";
 
 const NAV_ITEMS = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -33,6 +34,25 @@ export default function Layout({ children }: LayoutProps) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [unreadAlerts, setUnreadAlerts] = useState<number>(0);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchAlerts = async () => {
+      try {
+        const res = await api.get<any[]>('/alerts?active=true');
+        setUnreadAlerts(res.length);
+      } catch (err) {
+        console.error('Failed to fetch alerts', err);
+      }
+    };
+
+    fetchAlerts();
+    const interval = setInterval(fetchAlerts, 30000);
+
+    return () => clearInterval(interval);
+  }, [user]);
 
   useEffect(() => {
     try {
@@ -137,23 +157,17 @@ export default function Layout({ children }: LayoutProps) {
               <Menu className="w-5 h-5" />
             </button>
 
-            {/* Global Search */}
-            <div className="max-w-md w-full relative hidden sm:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search asset ID or location..."
-                className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-full pl-10 pr-4 py-2 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors"
-              />
-            </div>
+            {/* Global Search Removed in favor of local search */}
           </div>
 
           <div className="flex items-center gap-4 sm:gap-6">
             <button className="relative text-slate-500 hover:text-slate-900 transition-colors">
               <Bell className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white" />
+              {unreadAlerts > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-red-500 rounded-full border border-white text-[10px] font-bold text-white flex items-center justify-center px-1">
+                  {unreadAlerts > 99 ? '99+' : unreadAlerts}
+                </span>
+              )}
             </button>
             
             <div className="h-6 w-px bg-slate-200" />

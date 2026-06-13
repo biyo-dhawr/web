@@ -110,6 +110,8 @@ export interface Report {
   waterSourceId: number | null;
   reporterType: string;
   content: string;
+  severityLevel?: string;
+  actionTaken?: string | null;
   isVerified: boolean;
   createdAt: string;
   waterSource?: WaterSource;
@@ -150,14 +152,18 @@ export interface AnalyticsStatusItem {
 export interface AnalyticsVillageItem {
   village: string;
   count: number;
-  functional: number;
-  nonFunctional: number;
+  functional?: number; // legacy
+  nonFunctional?: number; // legacy
+  working: number;
+  broken: number;
 }
 
 export interface AnalyticsSourceTypeItem {
   type: string;
   count: number;
-  functional: number;
+  functional?: number; // legacy
+  working: number;
+  broken: number;
 }
 
 export interface AnalyticsTrendItem {

@@ -8,7 +8,7 @@
  */
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
 // ─── Error Type ────────────────────────────────────────────────────────────
 
@@ -96,6 +96,12 @@ export const api = {
   post: <T>(endpoint: string, body: unknown) =>
     apiRequest<T>(endpoint, {
       method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  put: <T>(endpoint: string, body: unknown) =>
+    apiRequest<T>(endpoint, {
+      method: "PUT",
       body: JSON.stringify(body),
     }),
 
