@@ -1,10 +1,19 @@
 import { useEffect, useState } from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
-import { AlertCircle, CheckCircle2, AlertTriangle, Droplet, Clock } from "lucide-react";
+import { AlertCircle, CheckCircle2, AlertTriangle, Droplet, Clock, BarChart2 } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import AuthGuard from "@/components/AuthGuard";
 import api from "@/lib/api";
-import type { DashboardStats, WaterSourceListResponse, WaterSource, Village } from "@/lib/types";
+import type { DashboardStats, WaterSourceListResponse, WaterSource, Village, ReportTrendItem } from "@/lib/types";
 
 // Dynamically import Leaflet map to avoid SSR issues
 const Map = dynamic(() => import("@/components/DashboardMap"), {
@@ -20,6 +29,8 @@ export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [sources, setSources] = useState<WaterSource[]>([]);
   const [loading, setLoading] = useState(true);
+  const [trendData, setTrendData] = useState<ReportTrendItem[]>([]);
+  const [trendLoading, setTrendLoading] = useState(true);
 
   // Filter States
   const [region, setRegion] = useState<string>("");
@@ -47,7 +58,6 @@ export default function Dashboard() {
     async function loadDashboard() {
       try {
         setLoading(true);
-        // Build query string based on filters
         const params = new URLSearchParams();
         params.append("limit", "50");
         if (region) params.append("region", region);
@@ -69,6 +79,22 @@ export default function Dashboard() {
     }
     loadDashboard();
   }, [region, district, village, status]);
+
+  // Fetch weekly report trend (independent of map filters)
+  useEffect(() => {
+    async function loadTrend() {
+      try {
+        setTrendLoading(true);
+        const data = await api.get<ReportTrendItem[]>("/reports/trend/weekly");
+        setTrendData(data);
+      } catch (err) {
+        console.error("Failed to load trend:", err);
+      } finally {
+        setTrendLoading(false);
+      }
+    }
+    loadTrend();
+  }, []);
 
   // Fetch villages when district changes
   useEffect(() => {
@@ -271,6 +297,77 @@ export default function Dashboard() {
               </span>
             </div>
           </div>
+        </div>
+
+        {/* Weekly Reports Bar Chart */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-cyan-50 rounded-lg flex items-center justify-center border border-cyan-100">
+                <BarChart2 className="w-4 h-4 text-cyan-600" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">Reports This Week</h2>
+                <p className="text-xs text-slate-400">Water issues submitted over last 7 days</p>
+              </div>
+            </div>
+            {!trendLoading && (
+              <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
+                Total: {trendData.reduce((s, d) => s + d.count, 0)}
+              </span>
+            )}
+          </div>
+
+          {trendLoading ? (
+            <div className="h-48 flex items-center justify-center">
+              <div className="w-6 h-6 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={trendData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 11, fill: "#94a3b8" }}
+                  tickFormatter={(v) =>
+                    new Date(v).toLocaleDateString("en-US", { weekday: "short" })
+                  }
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  allowDecimals={false}
+                  tick={{ fontSize: 11, fill: "#94a3b8" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  cursor={{ fill: "#f0f9ff" }}
+                  contentStyle={{
+                    background: "#fff",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                  }}
+                  labelFormatter={(v) =>
+                    new Date(v).toLocaleDateString("en-US", {
+                      weekday: "long",
+                      month: "short",
+                      day: "numeric",
+                    })
+                  }
+                  formatter={(value: number) => [value, "Reports"]}
+                />
+                <Bar
+                  dataKey="count"
+                  fill="#06b6d4"
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={48}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
 
         {/* Main Content Area */}

@@ -109,14 +109,21 @@ export interface Report {
   villageId: number | null;
   waterSourceId: number | null;
   reporterType: string;
+  phoneNumber?: string | null;
   content: string;
   severityLevel?: string;
+  status: string;
   actionTaken?: string | null;
   isVerified: boolean;
   createdAt: string;
   waterSource?: WaterSource;
   village?: Village;
   user?: { id: string; fullName: string; email: string } | null;
+}
+
+export interface ReportTrendItem {
+  date: string;   // 'YYYY-MM-DD'
+  count: number;
 }
 
 // ─── Alerts ────────────────────────────────────────────────────────────────
