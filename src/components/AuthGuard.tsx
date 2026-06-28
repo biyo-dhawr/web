@@ -5,9 +5,10 @@ import type { UserRole, AuthUser } from "@/lib/types";
 interface AuthGuardProps {
   children: ReactNode;
   requireStaff?: boolean;
+  requireAdmin?: boolean;
 }
 
-export default function AuthGuard({ children, requireStaff }: AuthGuardProps) {
+export default function AuthGuard({ children, requireStaff, requireAdmin }: AuthGuardProps) {
   const router = useRouter();
   const [isChecking, setIsChecking] = useState<boolean>(true);
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
@@ -24,7 +25,14 @@ export default function AuthGuard({ children, requireStaff }: AuthGuardProps) {
     try {
       const user: AuthUser = JSON.parse(userRaw);
 
-      if (requireStaff) {
+      if (requireAdmin) {
+        if (user.role === "GOVERNMENT WORKER") {
+          setIsAuthorized(true);
+        } else {
+          router.replace("/dashboard");
+          return;
+        }
+      } else if (requireStaff) {
         if (
           user.role === "GOVERNMENT WORKER" ||
           user.role === "VILLAGE LEADER"
@@ -44,7 +52,7 @@ export default function AuthGuard({ children, requireStaff }: AuthGuardProps) {
     } finally {
       setIsChecking(false);
     }
-  }, [router, requireStaff]);
+  }, [router, requireStaff, requireAdmin]);
 
   if (isChecking) {
     return (

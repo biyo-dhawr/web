@@ -26,7 +26,12 @@ export default function Login() {
       localStorage.setItem("token", res.token);
       localStorage.setItem("user", JSON.stringify(res.user));
 
-      router.push("/dashboard");
+      // Village Leaders go directly to their field reports, not the dashboard
+      if (res.user.role === "VILLAGE LEADER") {
+        router.push("/reports");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err: any) {
       setError(err.message || "Invalid credentials");
     } finally {
@@ -79,9 +84,6 @@ export default function Login() {
                   <span className="text-slate-900 font-bold text-lg border-b-2 border-slate-900 pb-4 -mb-[18px]">
                     Sign In
                   </span>
-                  <Link href="/auth/register" className="text-slate-500 font-medium text-lg hover:text-slate-700 pb-4">
-                    Register
-                  </Link>
                 </div>
                 <h2 className="text-3xl font-bold text-[#0f172a] mb-3 tracking-tight">Welcome Back</h2>
                 <p className="text-slate-500 text-sm">Enter your credentials to access the enterprise dashboard.</p>
