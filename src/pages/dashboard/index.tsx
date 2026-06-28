@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
 import { AlertCircle, CheckCircle2, AlertTriangle, Droplet, Clock, BarChart2 } from "lucide-react";
 import {
   BarChart,
@@ -26,14 +27,28 @@ const Map = dynamic(() => import("@/components/DashboardMap"), {
 });
 
 export default function Dashboard() {
+  const router = useRouter();
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [sources, setSources] = useState<WaterSource[]>([]);
+  const [sources, setSources] = useState<WaterSource[]>([]); // paginated list
+  const [allMapSources, setAllMapSources] = useState<WaterSource[]>([]); // all for map
   const [loading, setLoading] = useState(true);
   const [trendData, setTrendData] = useState<ReportTrendItem[]>([]);
   const [trendLoading, setTrendLoading] = useState(true);
 
-  // Filter States
-  const [region, setRegion] = useState<string>("");
+  // Redirect Village Leaders away from dashboard immediately
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("user");
+      if (raw) {
+        const user = JSON.parse(raw);
+        if (user.role === "VILLAGE LEADER") {
+          router.replace("/reports");
+        }
+      }
+    } catch {}
+  }, [router]);
+
+  const [region, setRegion] = useState<string>("Awdal");
   const [district, setDistrict] = useState<string>("");
   const [village, setVillage] = useState<string>("");
   const [status, setStatus] = useState<string>("");
@@ -54,12 +69,26 @@ export default function Dashboard() {
   const [mapCenter, setMapCenter] = useState<[number, number]>([10.5, 43.2]);
   const [mapZoom, setMapZoom] = useState<number>(9);
 
+  // ── Load ALL water sources for the map (no limit) ──────────────────────────
+  useEffect(() => {
+    async function loadAllMapSources() {
+      try {
+        const res = await api.get<WaterSourceListResponse>("/water-sources?page=1&limit=1000");
+        setAllMapSources(res.data);
+      } catch (err) {
+        console.error("Failed to load map sources:", err);
+      }
+    }
+    loadAllMapSources();
+  }, []);
+
+  // ── Load filtered/paginated sources for table/stats ────────────────────────
   useEffect(() => {
     async function loadDashboard() {
       try {
         setLoading(true);
         const params = new URLSearchParams();
-        params.append("limit", "50");
+        params.append("limit", "100");
         if (region) params.append("region", region);
         if (district) params.append("district", district);
         if (village) params.append("village", village);
@@ -211,7 +240,7 @@ export default function Dashboard() {
   };
 
   const handleResetFilters = () => {
-    setRegion("");
+    setRegion("Awdal");
     setDistrict("");
     setVillage("");
     setStatus("");
@@ -386,8 +415,7 @@ export default function Dashboard() {
                 onChange={handleRegionChange} 
                 className="bg-transparent border border-slate-200 text-slate-700 text-sm font-medium rounded-lg px-3 py-1.5 outline-none focus:border-cyan-500 min-w-[120px]"
               >
-                <option value="">All Regions</option>
-                <option value="Awdal">Awdal</option>
+                <option value="Awdal">Awdal Region</option>
               </select>
               <select 
                 value={district} 

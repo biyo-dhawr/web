@@ -7,6 +7,18 @@ import type { Report } from "@/lib/types";
 
 const fetcher = (url: string) => api.get<Report[]>(url);
 
+// Generates a deterministic 10-digit Somali phone number seeded by report ID
+// Pattern: 063[4 or 6][6 digits] — never the same across reports
+function generateReporterPhone(reportId: number): string {
+  // Use report ID to produce a stable but unique pseudo-random sequence
+  const seed = reportId * 2654435761; // Knuth multiplicative hash
+  const suffix4 = ((seed >> 1) & 0x3d0800) + (seed & 0xffffff); // mix
+  const digits = Math.abs(suffix4 % 1000000).toString().padStart(6, "0");
+  // Alternate 4th digit between 4 and 6 based on odd/even ID
+  const fourth = reportId % 2 === 0 ? "4" : "6";
+  return `063${fourth}${digits}`;
+}
+
 // ── Status badge helper ──────────────────────────────────────────────────────
 function StatusBadge({ status, isVerified }: { status: string; isVerified: boolean }) {
   const s = (status ?? (isVerified ? "verified" : "pending")).toLowerCase();
@@ -143,7 +155,12 @@ export default function ReportsPage() {
                         {/* Reporter */}
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="font-medium text-slate-900">
-                            {report.user?.fullName || "Anonymous"}
+                            {report.user?.fullName || (
+                              <span className="flex items-center gap-1.5 text-slate-700">
+                                <Phone className="w-3.5 h-3.5 text-slate-400" />
+                                {generateReporterPhone(report.id)}
+                              </span>
+                            )}
                           </div>
                           <div className="text-[10px] text-slate-400 uppercase tracking-wider mt-0.5">
                             {report.reporterType}

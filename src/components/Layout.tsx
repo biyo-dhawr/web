@@ -11,15 +11,17 @@ import {
   LogOut,
   Menu,
   X,
+  Users,
 } from "lucide-react";
 import type { AuthUser } from "@/lib/types";
 import api from "@/lib/api";
 
 const NAV_ITEMS = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Water Sources", href: "/admin/water-sources", icon: Droplet, requireStaff: true },
-  { name: "Analytics", href: "/analytics", icon: BarChart3, requireStaff: true },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, requireAdmin: true },
+  { name: "Water Sources", href: "/admin/water-sources", icon: Droplet, requireAdmin: true },
+  { name: "Analytics", href: "/analytics", icon: BarChart3, requireAdmin: true },
   { name: "Field Reports", href: "/reports", icon: Droplet, requireStaff: true },
+  { name: "Village Leaders", href: "/admin/village-leaders", icon: Users, requireAdmin: true },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -114,11 +116,15 @@ export default function Layout({ children }: LayoutProps) {
 
         {/* Navigation */}
         <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
-          {NAV_ITEMS.filter(
-            (item) =>
-              !item.requireStaff ||
-              (user?.role === "GOVERNMENT WORKER" || user?.role === "VILLAGE LEADER")
-          ).map((item) => {
+          {NAV_ITEMS.filter((item: any) => {
+            if (item.requireAdmin) {
+              return user?.role === "GOVERNMENT WORKER";
+            }
+            if (item.requireStaff) {
+              return user?.role === "GOVERNMENT WORKER" || user?.role === "VILLAGE LEADER";
+            }
+            return true;
+          }).map((item: any) => {
             const isActive =
               router.pathname === item.href ||
               (item.href !== "/" && router.pathname?.startsWith(item.href));
