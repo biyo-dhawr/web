@@ -11,7 +11,7 @@ interface VillageLeader {
   email: string;
   phoneNumber?: string;
   districtId: number;
-  districtName?: string;
+  district?: District;
 }
 
 export default function AdminVillageLeaders() {
@@ -67,7 +67,7 @@ export default function AdminVillageLeaders() {
   const filteredLeaders = leaders.filter(l => 
     l.fullName.toLowerCase().includes(search.toLowerCase()) || 
     l.email.toLowerCase().includes(search.toLowerCase()) ||
-    (l.districtName && l.districtName.toLowerCase().includes(search.toLowerCase()))
+    (l.district?.name && l.district.name.toLowerCase().includes(search.toLowerCase()))
   );
 
   const handleOpenModal = (leader?: VillageLeader) => {
@@ -210,7 +210,7 @@ export default function AdminVillageLeaders() {
                       <td className="px-6 py-4">{leader.phoneNumber || "-"}</td>
                       <td className="px-6 py-4">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-                          {leader.districtName || "Unknown"}
+                          {leader.district?.name || "Unknown"}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
