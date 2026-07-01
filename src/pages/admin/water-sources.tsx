@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { Search, Plus, Edit2, Loader2, ChevronLeft, ChevronRight, ChevronRight as BreadcrumbArrow, Download, Trash2, AlertTriangle, Droplet, Activity, AlertCircle } from "lucide-react";
+import { Search, Plus, Edit2, Eye, Loader2, ChevronLeft, ChevronRight, ChevronRight as BreadcrumbArrow, Download, Trash2, AlertTriangle, Droplet, Activity, AlertCircle } from "lucide-react";
 import AuthGuard from "@/components/AuthGuard";
 import api from "@/lib/api";
 import { exportToCSV } from "@/lib/export";
@@ -445,7 +445,12 @@ export default function AdminWaterSources() {
                       </td>
                       <td className="py-4 px-6 text-sm font-medium text-slate-600">WS-{source.id.toString().padStart(3, '0')}</td>
                       <td className="py-4 px-6">
-                        <p className="text-sm font-bold text-slate-900">{source.name}</p>
+                        <button
+                          onClick={() => router.push(`/water-sources/${source.id}`)}
+                          className="text-left text-sm font-bold text-slate-900 hover:text-cyan-700 transition-colors"
+                        >
+                          {source.name}
+                        </button>
                       </td>
                       <td className="py-4 px-6 text-sm text-slate-600">{source.type}</td>
                       <td className="py-4 px-6">
@@ -496,6 +501,13 @@ export default function AdminWaterSources() {
                       </td>
                       <td className="py-4 px-6 text-center">
                         <div className="flex items-center justify-center gap-2">
+                          <button 
+                            onClick={() => router.push(`/water-sources/${source.id}`)}
+                            title="View report"
+                            className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
                           <button 
                             onClick={() => {
                               setEditSource(source);

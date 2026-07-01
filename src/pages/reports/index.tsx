@@ -1,4 +1,5 @@
 import Head from "next/head";
+import Link from "next/link";
 import useSWR from "swr";
 import { CheckCircle, XCircle, Trash2, AlertCircle, RefreshCw, Phone } from "lucide-react";
 import AuthGuard from "@/components/AuthGuard";
@@ -182,7 +183,14 @@ export default function ReportsPage() {
 
                         {/* Water Source */}
                         <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-900">
-                          {report.waterSource?.name || (
+                          {report.waterSource?.id ? (
+                            <Link
+                              href={`/water-sources/${report.waterSource.id}`}
+                              className="hover:text-cyan-700 transition-colors"
+                            >
+                              {report.waterSource.name}
+                            </Link>
+                          ) : report.waterSource?.name || (
                             <span className="text-slate-400">-</span>
                           )}
                         </td>

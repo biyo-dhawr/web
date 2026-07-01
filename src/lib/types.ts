@@ -64,13 +64,16 @@ export interface Village {
 export interface WaterSource {
   id: number;
   villageId: number;
+  village_id?: number;
   name: string;
   type: string;
   status: string;
   waterLevel: number;
+  water_level?: number;
   latitude: number | null;
   longitude: number | null;
   lastMaintained: string | null;
+  last_maintained?: string | null;
   village?: Village;
   sensorReadings?: SensorReading[];
 }
@@ -144,7 +147,40 @@ export interface DashboardStats {
   totalSources: number;
   pendingReports: number;
   criticalZones: number;
+  systemAlerts?: number;
   recentReports: Report[];
+}
+
+export interface WaterSourceAiReport {
+  title: string;
+  executiveSummary: string;
+  riskLevel: string;
+  currentCondition: string;
+  mainConcerns: string[];
+  supportingEvidence: string[];
+  recommendedActions: string[];
+  maintenancePriority: string;
+  communityImpact: string;
+  dataLimitations: string[];
+}
+
+export interface WaterSourceReportResponse {
+  sourceId: number;
+  generatedAt: string;
+  report: WaterSourceAiReport;
+  context: {
+    waterSource: WaterSource;
+    village: Village;
+    district: District;
+    region: Region;
+    summaryMetrics: {
+      recentReportCount7Days: number;
+      recentReportCount30Days: number;
+      highSeverityReportCount30Days: number;
+      verifiedReportCount30Days: number;
+      daysSinceMaintenance: number | null;
+    };
+  };
 }
 
 // ─── Analytics ─────────────────────────────────────────────────────────────
