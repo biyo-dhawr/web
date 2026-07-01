@@ -13,6 +13,12 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import AuthGuard from "@/components/AuthGuard";
+const IntelligencePanel = dynamic(() => import("@/components/IntelligencePanel"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-32 bg-slate-100 animate-pulse rounded-2xl border border-slate-200" />
+  ),
+});
 import api from "@/lib/api";
 import type { DashboardStats, WaterSourceListResponse, WaterSource, Village, ReportTrendItem } from "@/lib/types";
 
@@ -538,6 +544,9 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        {/* ── AI Intelligence Center ───────────────────────────── */}
+        <IntelligencePanel />
 
       </div>
     </AuthGuard>
