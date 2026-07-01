@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { FileText } from "lucide-react";
 import L from "leaflet";
 import type { WaterSource } from "@/lib/types";
 
@@ -77,6 +79,7 @@ export default function DashboardMap({
   zoom = 9,
   filterStatus,
 }: DashboardMapProps) {
+  const router = useRouter();
   const [tileKey, setTileKey] = useState<TileKey>("satellite");
 
   const getBarColor = (level: number) => {
@@ -243,11 +246,19 @@ export default function DashboardMap({
                     <div className="flex justify-between items-center text-xs mt-3 bg-slate-50 p-2 rounded-lg border border-slate-100">
                       <span className="font-semibold text-slate-500">Maintenance:</span>
                       <span className="font-bold text-slate-800">
-                        {(source as any).last_maintained
-                          ? new Date((source as any).last_maintained).toLocaleDateString()
+                        {source.last_maintained || source.lastMaintained
+                          ? new Date((source.last_maintained || source.lastMaintained) as string).toLocaleDateString()
                           : "No recent maintenance"}
                       </span>
                     </div>
+
+                    <button
+                      onClick={() => router.push(`/water-sources/${source.id}`)}
+                      className="w-full mt-3 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      View source report
+                    </button>
                   </div>
                 </div>
               </Popup>
