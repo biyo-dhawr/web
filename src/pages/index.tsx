@@ -10,28 +10,28 @@ const steps = [
     title: "1. Nomad Reporting (USSD)",
     description: "Nomads submit an urgent report using the USSD system on their mobile phones, allowing them to report issues instantly without needing internet access.",
     color: "bg-blue-500/10 text-blue-500",
-    image: "/api/image?name=step1"
+    image: "/images/step1.png"
   },
   {
     icon: ShieldCheck,
     title: "2. Government Verification",
     description: "The government and relevant authorities verify the report within the system to assess the actual need and pinpoint the exact location of the well.",
     color: "bg-amber-500/10 text-amber-500",
-    image: "/api/image?name=step2"
+    image: "/images/step2.png"
   },
   {
     icon: Wrench,
     title: "3. Well & Riig Repair",
     description: "Technical teams are dispatched to repair the broken well or riig, ensuring water flow is restored and can be poured for the livestock.",
     color: "bg-emerald-500/10 text-emerald-500",
-    image: "/api/image?name=step3"
+    image: "/images/step3.png"
   },
   {
     icon: Droplets,
     title: "4. Water, Life & Happiness",
     description: "Clean water is restored! The nomads and their livestock finally get the water they need, bringing happiness, health, and life back to the community.",
     color: "bg-cyan-500/10 text-cyan-500",
-    image: "/api/image?name=step4"
+    image: "/images/step4.png"
   }
 ];
 
@@ -71,7 +71,7 @@ export default function LandingPage() {
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-slate-900">
         <div className="absolute inset-0 z-0">
           <img 
-            src="/api/image?name=hero" 
+            src="/images/hero.png" 
             alt="Drought in Somalia" 
             className="w-full h-full object-cover object-center opacity-60"
           />
@@ -131,7 +131,7 @@ export default function LandingPage() {
               <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                 <div className="absolute inset-0 bg-cyan-500/20 mix-blend-overlay z-10" />
                 <img 
-                  src="/api/image?name=nomads" 
+                  src="/images/nomads.png" 
                   alt="Nomads searching for water" 
                   className="w-full h-full object-cover"
                 />
@@ -256,7 +256,7 @@ export default function LandingPage() {
               </div>
               <div className="relative h-96 lg:h-auto">
                 <img 
-                  src="/api/image?name=well" 
+                  src="/images/well.png" 
                   alt="Restored water well" 
                   className="absolute inset-0 w-full h-full object-cover"
                 />

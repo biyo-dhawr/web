@@ -33,7 +33,7 @@ export default function Login() {
         router.push("/dashboard");
       }
     } catch (err: any) {
-      setError(err.message || "Invalid credentials");
+      setError(err.message || "username or password incorrect");
     } finally {
       setLoading(false);
     }
